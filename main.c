@@ -13,7 +13,7 @@ void InitAll(void);
 void Delay400ms(void);
 void Delay(unsigned char i);
 void StartAD(void);
-//void SendtoBluetooth();
+void SendtoBluetooth();
 //void SendtoMobile();
 
 void main(void) {
@@ -24,7 +24,7 @@ void main(void) {
     Delay(10);
   //  for( ; ;){
     StartAD();
-//    SendtoBluetooth();
+    SendtoBluetooth();
 //    SendtoMobile();
 
   //  }
@@ -69,7 +69,7 @@ void StartAD(void)
 	  ADC12CTL1 = ADC12SHP;                     // Use sampling timer
 	  ADC12IE = 0x01;                           // Enable interrupt
 	  ADC12CTL0 |= ADC12ENC;
-	  P6SEL |= 0x80;                            // P6.0 ADC option select
+	  P6SEL |= 0x80;                            // P6.7 ADC option select
 //	  P1DIR |= 0x01;                            // P1.0 output
 
 	  while (1)
@@ -110,12 +110,42 @@ __interrupt void ADC12_ISR(void)
   default: break;
   }
 }
-/*void SendtoBluetooth()
+void SendtoBluetooth()
 {
+	P3SEL = BIT3+BIT4;                        // P3.4,5 = USCI_A0 TXD/RXD
+	  UCA0CTL1 |= UCSWRST;                      // **Put state machine in reset**
+	  UCA0CTL1 |= UCSSEL_2;                     // SMCLK
+	  UCA0BR0 = 6;                              // 1MHz 9600 (see User's Guide)
+	  UCA0BR1 = 0;                              // 1MHz 9600
+	  UCA0MCTL = UCBRS_0 + UCBRF_13 + UCOS16;   // Modln UCBRSx=0, UCBRFx=0,
+	                                            // over sampling
+	  UCA0CTL1 &= ~UCSWRST;                     // **Initialize USCI state machine**
+	  UCA0IE |= UCRXIE;                         // Enable USCI_A0 RX interrupt
 
+	  __bis_SR_register(LPM0_bits + GIE);       // Enter LPM0, interrupts enabled
+	  __no_operation();                         // For debugger
+}
+#pragma vector=USCI_A0_VECTOR
+__interrupt void USCI_A0_ISR(void)
+{
+  switch(__even_in_range(UCA0IV,4))
+  {
+  case 0:break;                             // Vector 0 - no interrupt
+  case 2:                                   // Vector 2 - RXIFG
+    while (!(UCA0IFG&UCTXIFG));             // USCI_A0 TX buffer ready?
+    UCA0TXBUF = UCA0RXBUF;                  // TX -> RXed character
+    break;
+  case 4:break;                             // Vector 4 - TXIFG
+  default: break;
+  }
 }
 
-void SendtoMobile()
+
+
+
+
+
+/*void SendtoMobile()
 {
 	String BT_DATA = "";
 	NewSoftSerial blueToothSerial(RxD,TxD);
