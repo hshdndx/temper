@@ -27,6 +27,7 @@
 
 volatile unsigned int result = 0;
 //volatile float result1 = 0.0;
+char t[6];
 
 void InitLcd(void);
 void InitAll(void);
@@ -34,17 +35,18 @@ void Delay400ms(void);
 void Delay(unsigned char i);
 void StartAD(void);
 void SendtoBluetooth(void);
-//void SendtoMobile();
+void SendtoMobile();
 void Sounds(unsigned int);
 void Delay1s(void);
 void ADC12Init(void);
+void UARTInit(void);
+
 
 void main(void) {
 	WDTCTL = WDTPW + WDTHOLD;
 	InitAll();
     //Dogs102x6_imageDraw(Dlogo, 0, 16);           //Display logo
     Dogs102x6_stringDraw(3, 0, "   Welcome to    ", DOGS102x6_DRAW_NORMAL);
-//    Delay(10);
 
     for( ; ;){
 
@@ -62,7 +64,7 @@ void main(void) {
      for(i=0;i<16000;i++){
     	 Delay1s();
      }
-
+//     SendtoBluetooth();
 //    }
     }
 }
@@ -121,11 +123,11 @@ void StartAD(void){
 	_EINT();
 	ADC12CTL0 |= ADC12SC;
 //    while(1);
-	char t[6];
+//	char t[6];
 	sprintf(t,"%d",result);
 	InitLcd();
 	Dogs102x6_stringDraw(3, 0, t, DOGS102x6_DRAW_NORMAL);
-
+	SendtoBluetooth();
 }
 #pragma vector = ADC12_VECTOR
 __interrupt void ADC12_ISR(void){
@@ -141,35 +143,30 @@ __interrupt void ADC12_ISR(void){
 	  }
 }
 
-void SendtoBluetooth()
-{
-	  P4SEL = BIT4+BIT5;                        // P4.5,4 = USCI_A1 TXD/RXD
-	  UCA1CTL1 |= UCSWRST;                      // **Put state machine in reset**
-	  UCA1CTL1 |= UCSSEL_2;                     // SMCLK
-	  UCA1BR0 = 6;                              // 1MHz 9600 (see User's Guide)
-	  UCA1BR1 = 0;                              // 1MHz 9600
-	  UCA1MCTL = UCBRS_0 + UCBRF_13 + UCOS16;   // Modln UCBRSx=0, UCBRFx=0,
-	                                            // over sampling
-	  UCA1CTL1 &= ~UCSWRST;                     // **Initialize USCI state machine**
-	  UCA1IE |= UCRXIE;                         // Enable USCI_A1 RX interrupt
 
-	  __bis_SR_register(LPM0_bits + GIE);       // Enter LPM0, interrupts enabled
-	  __no_operation();                         // For debugger
+void UARTInit(void){
+	UCA1CTL1 &= ~UCSWRST;
+	UCA1CTL1 = 0x10;
+	UCA1BR0 = 6;                              // 1MHz 9600 (see User's Guide)
+    UCA1BR1 = 0;                              // 1MHz 9600
+    UCA1MCTL = UCBRS_0 + UCBRF_13 + UCOS16;   // Modln UCBRSx=0, UCBRFx=0,
+//	UTCTL1 = 0x10;
+//	ME2 |= 0x20;
+    UCA1IE |= UCTXIE;
+
 }
-#pragma vector=USCI_A1_VECTOR
-__interrupt void USCI_A1_ISR(void)
-{
-  switch(__even_in_range(UCA1IV,4))
-  {
-  case 0:break;                             // Vector 0 - no interrupt
-  case 2:                                   // Vector 2 - RXIFG
-    while (!(UCA1IFG&UCTXIFG));             // USCI_A1 TX buffer ready?
-    UCA1TXBUF = UCA1RXBUF;                  // TX -> RXed character
-    break;
-  case 4:break;                             // Vector 4 - TXIFG
-  default: break;
-  }
+
+void SendtoBluetooth(void){
+	unsigned int i;
+//	sprintf(t,"%d",result);
+	UARTInit();
+	while (!(UCA1IFG&UCTXIFG));
+	for(i=0;i<6;i++){
+		UCA1TXBUF = t[i];
+	}
 }
+
+
 //sounds function
 void delay(unsigned char i)
 {
