@@ -52,9 +52,10 @@ void main(void) {
   __no_operation();            // For debugger
 }
 void InitAll(void){
-  InitLcd();
   InitPort();
   InitUart();
+  InitLcd();
+  InitLcd();
 }
 void InitPort(){
   P4DIR |= BIT0;                            // Set P1.0 to output direction
