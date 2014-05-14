@@ -9,6 +9,11 @@ void Sounds(char*t){
 //  READ TEN BIT
   P4OUT |= BIT0;
   switch((int)t[0] - 48){
+    case 0:
+      {
+      P7OUT = 0x000F;
+      break;
+      }
     case 1:
       {
         P7OUT = 0x000a ;
@@ -32,6 +37,26 @@ void Sounds(char*t){
     case 5:
       {
         P7OUT =0x0005 ;
+        break;
+      }
+    case 6:
+      {
+        P7OUT =0x0006;
+        break;
+      }
+    case 7:
+      {
+        P7OUT = 0x0007;
+        break;
+      }
+     case 8:
+      {
+        P7OUT = 0x0008;
+        break;
+      }
+      case 9:
+      {
+        P7OUT = 0x0009;
         break;
       }
     default: break;

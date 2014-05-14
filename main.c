@@ -35,6 +35,8 @@ void main(void) {
 //  P1DIR |= BIT0;                            // P1.0 output
 //  P1OUT &= ~BIT0;
 //  P1OUT |= BIT0;
+//  P4DIR |= BIT0;
+//  P4OUT |= BIT0;
   _EINT();
   InitAll();
   Dogs102x6_stringDraw(3, 0, "Temperature: ", DOGS102x6_DRAW_NORMAL);
