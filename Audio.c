@@ -40,7 +40,7 @@ void Sounds(char*t){
       Delay1s();
   }
   P4OUT &= ~BIT0;
-  for(i=0;i<10;i++){
+  for(i=0;i<20;i++){
     Delay1s();
   }
 
@@ -52,7 +52,7 @@ void Sounds(char*t){
   if((((int)t[0]-48)!= 0) && (((int)t[0]-48)!= 1)){
     P7OUT = 0x000a;
     P4OUT &= ~BIT0;
-    for(i=0;i<10;i++){
+    for(i=0;i<20;i++){
       Delay1s();
     }
     P4OUT |= BIT0;
@@ -111,7 +111,7 @@ void Sounds(char*t){
     }
   }
   P4OUT &= ~BIT0;
-  for(i=0;i<10;i++){
+  for(i=0;i<20;i++){
     Delay1s();
   }
 
@@ -122,7 +122,7 @@ void Sounds(char*t){
   }
   P7OUT = 0x000b;
   P4OUT &= ~BIT0;
-  for(i=0;i<10;i++){
+  for(i=0;i<20;i++){
     Delay1s();
   }
 
@@ -184,7 +184,7 @@ void Sounds(char*t){
     }
   }
   P4OUT &= ~BIT0;
-  for(i=0;i<10;i++){
+  for(i=0;i<20;i++){
     Delay1s();
   }
 
@@ -195,7 +195,7 @@ void Sounds(char*t){
   }
   P7OUT = 0x000c;
   P4OUT &= ~BIT0;
-  for(i=0;i<10;i++){
+  for(i=0;i<20;i++){
     Delay1s();
   }
 }
