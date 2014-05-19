@@ -32,11 +32,14 @@ void delay(unsigned int i);
 
 void main(void) {
   WDTCTL = WDTPW + WDTHOLD;
-//  P1DIR |= BIT0;                            // P1.0 output
-//  P1OUT &= ~BIT0;
-//  P1OUT |= BIT0;
-//  P4DIR |= BIT0;
-//  P4OUT |= BIT0;
+  P1DIR |= BIT0;                            // P1.0 output
+
+  P1OUT |= 0xff;
+  Delay1s();
+  Delay1s();
+  P1OUT &= ~BIT0;
+  Delay1s();
+
   _EINT();
   InitAll();
   Dogs102x6_stringDraw(3, 0, "Temperature: ", DOGS102x6_DRAW_NORMAL);
@@ -46,9 +49,7 @@ void main(void) {
     for(i=0;i<64000;i++){
      Delay1s();
     }
-    for(i=0;i<64000;i++){
-      Delay1s();
-    }
+
   }
   __bis_SR_register(LPM4_bits + GIE);     // Enter LPM4 w/interrupt
   __no_operation();            // For debugger
@@ -93,6 +94,7 @@ void InitADC(void){
   ADC12CTL1 |= ADC12SHP + ADC12CONSEQ_0;                     // Use sampling timer
   ADC12MCTL7 = ADC12INCH_7;
   ADC12IE = 0x01;
+  P6DIR &= ~BIT7;
   P6SEL |= BIT7;
   ADC12CTL0 |= ADC12ENC;
 }
@@ -102,8 +104,8 @@ void StartAD(void){
   InitADC();
 
   ADC12CTL0 |= ADC12SC;
-  temperature = (double)(result - 2100)/38.98;
-
+  temperature = (double)(result)/(1.12*69.8);
+///(1.12*76.9)
   int a;
   a= floor(temperature);
   int b;
@@ -116,12 +118,9 @@ void StartAD(void){
   d = floor((temperature-a)*10) + 48;
   t[3] = (char)d;
   t[2] = '.';
-  t[4] = '\0';
   Dogs102x6_stringDraw(4, 0, t, DOGS102x6_DRAW_NORMAL);
 
-  // P1DIR |= 0x01;                            // P1.0 output
-  //  P1OUT &= ~BIT0;
-  // P1OUT |= BIT0;
+
   unsigned int j=0;
   while(t[j]!='\0'){
     while((UCA1IFG&UCTXIFG)==0);
@@ -153,14 +152,7 @@ __interrupt void ADC12_ISR(void){
   case  6:                                  // Vector  6:  ADC12IFG0
   result = ADC12MEM0;
   ADC12CTL0 |= ADC12SC;
-//    if (result >3000)                 // ADC12MEM = A0 > 0.5AVcc?
-//          {
-//      P1OUT |= BIT0;                        // P1.0 = 1
-//          }
-//        else
-//          P1OUT &= ~BIT0;                       // P1.0 = 0
 
-//        __bic_SR_register_on_exit(LPM0_bits);   // Exit active CPU
   default: break;
   }
 }
